@@ -1,20 +1,24 @@
+<!--copyright luojia@luojia.me-->
 <meta charset="utf-8"/>
 <title>stringHider</title>
+
 <script>
 function convert(){
 	var texts=document.querySelectorAll('textarea');
 	var checkBox=document.querySelector('input[name="withDecodeWarper"]');
-	var string=texts[0].value,result='',tmpStr;
-	for(var i=0;string.length>i;i++){//转换部分
-		tmpStr=string.codePointAt(i).toString(2);
-		tmpStr=('0'.repeat(8-tmpStr.length)+tmpStr).replace(/1/g,'\u200c').replace(/0/g,'\u200d');
-		result+=tmpStr;
+	var string=texts[0].value,result='',resultArr=[];
+
+	for(var i=0;i<string.length;i++){
+		resultArr.push(string.codePointAt(i).toString(2).padStart(8,"0").replace(/1/g,'\u200c').replace(/0/g,'\u200d'));
 	}
+	result=resultArr.join('\uFEFF');
+
 	if(checkBox.checked){//拼接结果部分
-		result='"'+result+'".replace(/.{8}/g,function(u){return String.fromCharCode(parseInt(u.replace(/\u200c/g,1).replace(/\u200d/g,0),2))})';
+		result='"'+result+'".split(\'\uFEFF\').map((c,i,a)=>(i&&a[i-1].length>16)?\'\':String.fromCodePoint(parseInt(c.replace(/\u200c/g,1).replace(/\u200d/g,0),2))).join(\'\')';
 	}else{result='"'+result+'"';}
 	texts[1].value=result;
 }
+
 </script>
 <h1><a href="https://coding.net/u/luojia/p/stringHider/git" target="_blank">stringHider</a></h1>
 <p>把字符串转换为零宽空白字符串</p>
@@ -24,3 +28,4 @@ function convert(){
 <br>
 
 <textarea style="width: 100%;height: 10%;"></textarea>
+
